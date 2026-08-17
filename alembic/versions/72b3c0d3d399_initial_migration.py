@@ -1,18 +1,18 @@
 """Initial Migration
 
-Revision ID: 8f81337b7592
+Revision ID: 72b3c0d3d399
 Revises: 
-Create Date: 2026-08-15 15:16:08.969393
+Create Date: 2026-08-15 22:34:07.856184
 
 """
 from typing import Sequence, Union
 
 from alembic import op
 import sqlalchemy as sa
-import sqlalchemy_utils
+
 
 # revision identifiers, used by Alembic.
-revision: str = '8f81337b7592'
+revision: str = '72b3c0d3d399'
 down_revision: Union[str, Sequence[str], None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -32,16 +32,7 @@ def upgrade() -> None:
     )
     op.create_table('pedidos',
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
-    sa.Column('status',
-              sqlalchemy_utils.types.choice.ChoiceType(
-                          choices=(
-                            ("PENDENTE", "PENDENTE"),
-                            ("CANCELADO", "CANCELADO"),
-                            ("FINALIZADO", "FINALIZADO")
-                          )
-                        ),
-              nullable=True
-    ),
+    sa.Column('status', sa.String(), nullable=True),
     sa.Column('usuario', sa.Integer(), nullable=True),
     sa.Column('preco', sa.Float(), nullable=True),
     sa.ForeignKeyConstraint(['usuario'], ['usuarios.id'], ),

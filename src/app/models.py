@@ -1,12 +1,12 @@
 from sqlalchemy import Column, String, Integer, Boolean, Float, ForeignKey
 from sqlalchemy.orm import declarative_base
-from sqlalchemy_utils.types import ChoiceType
+# from sqlalchemy_utils.types import ChoiceType
 from pathlib import Path
 from sqlalchemy import create_engine
 
 # cria conexão com banco de dados
 BASE_DIR = Path(__file__).resolve().parent # path: src/app/db
-DATABASE_URL = f"sqlite:///{BASE_DIR / 'database.db'}"
+DATABASE_URL = f"sqlite:///{BASE_DIR / 'db' / 'database.db'}"
 
 db = create_engine(DATABASE_URL)
 
@@ -34,14 +34,14 @@ class Usuario(Base):
 class Pedido(Base):
     __tablename__= "pedidos"
 
-    STATUS_PEDIDOS = (
-        ("PENDENTE", "PENDENTE"),
-        ("CANCELADO", "CANCELADO"),
-        ("FINALIZADO", "FINALIZADO")
-    )
+   # STATUS_PEDIDOS = (
+   #     ("PENDENTE", "PENDENTE"),
+   #     ("CANCELADO", "CANCELADO"),
+   #     ("FINALIZADO", "FINALIZADO")
+   # )
 
     id      = Column("id", Integer, primary_key=True, autoincrement=True)
-    status  = Column("status", ChoiceType(choices=STATUS_PEDIDOS)) # pendente/cancelado/finalizado
+    status  = Column("status", String) # pendente/cancelado/finalizado
     usuario = Column("usuario", ForeignKey("usuarios.id")) # chave estrangeira com acesso a classe usuarios
     preco   = Column("preco", Float)
     # itens =

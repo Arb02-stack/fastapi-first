@@ -1,4 +1,5 @@
 __pycache__/
+src/app/db/database.db
 *.py[cod]
 *$py.class
 .venv/
