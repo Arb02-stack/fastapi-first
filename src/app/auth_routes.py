@@ -1,6 +1,7 @@
-from fastapi import APIRouter
-from models import Usuario, db 
-from sqlalchemy.orm import sessionmaker
+from fastapi import APIRouter, Depends, HTTPException
+from models import Usuario
+from dependencies import pegar_sessao
+from main import bcrypt_context
 
 auth_router = APIRouter(prefix='/auth', tags=['auth'])
 
@@ -12,25 +13,25 @@ async def home_auth_router():
             "status": "online",
             "message": "APIRouter (/auth)",
            }
-
+    
 # Criar usuário
 @auth_router.post('/criar_conta')
-async def criar_conta(email: str, senha: str, nome: str):
-    # cria conexão com banco de dados
-    Session = sessionmaker(bind=db)
-    # Abre uma conexão com o banco
-    session = Session()
-    # Faz busca na tabela Usuario e compara o email
+async def criar_conta(email: str, senha: str, nome: str, session = Depends(pegar_sessao)):
     usuario = session.query(Usuario).filter(Usuario.email == email).first()
     if usuario:
         # Existe um user com esse email
-        return {"mensagem": "já existe um usuário cadastrado com esse email."}
+        raise HTTPException(
+                    status_code=400,
+                    detail="E-mail de usuário já cadastrado no sistema."
+                )
     else:
-        # Não existe um user com esse email | Cadastro
-        novo_usuario = Usuario(nome, email, senha)
+        # Se não existir um user com esse email cria o Cadastro
+        senha_criptografada = bcrypt_context.hash(senha) # criptografa a senha
+        novo_usuario = Usuario(nome, email, senha_criptografada) 
         session.add(novo_usuario)
         session.commit()
-        return {"mensagem": "usuário cadastrado com sucesso!"}
+        return {"mensagem": f"usuário cadastrado com sucesso! [{email}]"}
+
 
 
 
