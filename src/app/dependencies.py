@@ -1,3 +1,5 @@
+# conexão com banco de dados
+
 from models import db 
 from sqlalchemy.orm import sessionmaker
 
