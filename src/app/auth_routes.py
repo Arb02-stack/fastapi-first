@@ -11,6 +11,15 @@ def criar_token(id_usuario):
     token = f"asjhg7dsfhjhka8665a{id_usuario}"
     return token
 
+def autenticar_usuario(email, senha, session):
+    usuario = session.query(Usuario).filter(Usuario.email == email).first()
+    if not usuario:
+        return False
+    elif not bcrypt_context.verify(senha, usuario.senha): # compara a senha informada com a senha (hash) armazenada no DB
+        return False
+    return usuario
+
+
 # Rota inicial (home)
 @auth_router.get('/')
 async def home_auth_router():
@@ -47,9 +56,9 @@ async def criar_conta(usuario_schema: UsuarioSchema, session: Session = Depends(
 # rota login
 @auth_router.post("/login")
 async def login(login_schema: LoginSchema, session: Session = Depends(pegar_sessao) ):
-    usuario = session.query(Usuario).filter(Usuario.email == login_schema.email).first()
+    usuario = autenticar_usuario(login_schema.email, login_schema.senha, session)
     if not usuario:
-        raise HTTPException(status_code=400, detail="Usuário não cadastrado.")
+        raise HTTPException(status_code=400, detail="Usuário não cadastrado ou credenciais inválidas.")
     else:
         access_token = criar_token(usuario.id)
         # headers
