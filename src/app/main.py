@@ -7,6 +7,8 @@ import os
 # Carrega a secret key (.env) no mesmo diretorio do main.py
 load_dotenv()
 SECRET_KEY = os.getenv("SECRET_KEY")
+ALGORITHM  = os.getenv("ALGORITHM") # token
+ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES")) # token
 
 app = FastAPI()
 
