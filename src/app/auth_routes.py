@@ -4,9 +4,9 @@ from dependencies import pegar_sessao, verificar_token
 from main import bcrypt_context, ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES, SECRET_KEY
 from schemas import UsuarioSchema, LoginSchema
 from sqlalchemy.orm import Session
-from sqlalchemy import select
 from jose import jwt, JWTError
 from datetime import datetime, timedelta, timezone
+from fastapi.security import OAuth2PasswordRequestForm
 
 auth_router = APIRouter(prefix='/auth', tags=['auth'])
 
@@ -88,7 +88,21 @@ async def login(login_schema: LoginSchema, session: Session = Depends(pegar_sess
             "refresh_token": refresh_token, # duração de 7 dias
             "token_type"   : "Bearer" # JWT Bearer
         }
-        
+
+# auth request form
+@auth_router.post("/login_form")
+async def login_form(dados_formulario: OAuth2PasswordRequestForm = Depends(), session: Session = Depends(pegar_sessao)):
+    usuario = autenticar_usuario(dados_formulario.username, dados_formulario.password, session)
+    if not usuario:
+        raise HTTPException(status_code=400, detail="Usuário não cadastrado ou credenciais inválidas.")
+    else:
+        access_token  = criar_token(usuario.id)
+        # headers
+        return {
+            "access_token" : access_token, # duração de 30 dias
+            "token_type"   : "Bearer" # JWT Bearer
+        }
+       
 @auth_router.get('/refresh')
 async def use_refresh_token(usuario: Usuario = Depends(verificar_token)):
     access_token = criar_token(usuario.id)
