@@ -1,6 +1,5 @@
-from sqlalchemy import Column, String, Integer, Boolean, Float, ForeignKey
-from sqlalchemy.orm import declarative_base
-# from sqlalchemy_utils.types import ChoiceType
+from sqlalchemy import Column, String, Integer, Float, ForeignKey
+from sqlalchemy.orm import declarative_base, Mapped, mapped_column
 from pathlib import Path
 from sqlalchemy import create_engine
 
@@ -16,12 +15,19 @@ Base = declarative_base()
 # cria a classe/tabelas do banco
 class Usuario(Base):
     __tablename__= "usuarios"
-    id    = Column("id",    Integer, primary_key=True, autoincrement=True)
-    nome  = Column("nome",  String,  nullable=False)
-    email = Column("email", String,  nullable=False)
-    senha = Column("senha", String,  nullable=False)
-    ativo = Column("ativo", Boolean, default=True)
-    admin = Column("admin", Boolean, default=False)
+#    id    = Column("id",    Integer, primary_key=True, autoincrement=True)
+#    nome  = Column("nome",  String,  nullable=False)
+#    email = Column("email", String,  nullable=False)
+#    senha = Column("senha", String,  nullable=False)
+#    ativo = Column("ativo", Boolean, default=True)
+#    admin = Column("admin", Boolean, default=False)
+
+    id:    Mapped[int]  = mapped_column(primary_key=True, autoincrement=True)
+    nome:  Mapped[str]  = mapped_column(nullable=False)
+    email: Mapped[str]  = mapped_column(nullable=False)
+    senha: Mapped[str]  = mapped_column(nullable=False)
+    ativo: Mapped[bool] = mapped_column(default=True)
+    admin: Mapped[bool] = mapped_column(default=False)
 
     def __init__(self, nome, email, senha, ativo=True, admin=False):
         self.nome  = nome

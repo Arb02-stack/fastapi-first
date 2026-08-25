@@ -4,6 +4,7 @@ from dependencies import pegar_sessao, verificar_token
 from main import bcrypt_context, ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES, SECRET_KEY
 from schemas import UsuarioSchema, LoginSchema
 from sqlalchemy.orm import Session
+from sqlalchemy import select
 from jose import jwt, JWTError
 from datetime import datetime, timedelta, timezone
 
@@ -17,6 +18,13 @@ def criar_token(id_usuario, duracao_token=timedelta(minutes=ACCESS_TOKEN_EXPIRE_
         "sub": str(id_usuario),
         "exp": data_expiracao
     }
+
+    if SECRET_KEY is None:
+        raise RuntimeError("[SECRET KEY] não definida.") 
+
+    if ALGORITHM is None:
+        raise RuntimeError("[ALGORITHM] não definido.")
+
     jwt_codificado = jwt.encode(dic_info, SECRET_KEY, ALGORITHM)
     return jwt_codificado
 

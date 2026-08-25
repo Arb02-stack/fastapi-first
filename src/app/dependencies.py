@@ -18,10 +18,15 @@ def pegar_sessao():
 
 def verificar_token(token: str = Depends(oauth2_schema), session: Session = Depends(pegar_sessao)):
     try:
+        if not SECRET_KEY:
+            raise RuntimeError("[SECRET KEY] não definida.")
+       
         dict_info  = jwt.decode(token, SECRET_KEY, ALGORITHM)
-        id_usuario = int(dict_info.get("sub"))
-    except JWTError as err:
-        print(err)
+        sub = dict_info.get("sub")
+        if sub is None:
+            raise HTTPException(status_code=401, detail="Token Inválido.")
+        id_usuario = int(sub)
+    except (JWTError, ValueError):     
         raise HTTPException(status_code=401, detail="Acesso Negado! Verifique a validade do token.")
     # verificar se o token é valido
     # extrair o id do usuario do token
