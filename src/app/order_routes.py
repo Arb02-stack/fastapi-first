@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from schemas import PedidoSchema
 from sqlalchemy.orm import Session
 from dependencies import pegar_sessao, verificar_token
-from models import Pedido, Usuario
+from models import Pedido, Usuario, usuario
 
 order_router = APIRouter(
         prefix='/pedidos',
@@ -29,8 +29,12 @@ async def criar_pedido(pedido_schema: PedidoSchema, session: Session=Depends(peg
            }
 
 # cancelar pedido
-@order_router.post("/Pedido/cancelar/{id_pedido}")
-async def cancelar_pedido(id_pedido: int, session: Session = Depends(pegar_sessao)):
+@order_router.post("/pedido/cancelar/{id_pedido}")
+async def cancelar_pedido(
+        id_pedido: int,
+        session: Session = Depends(pegar_sessao),
+        usuario: Usuario = Depends(verificar_token)
+    ):
     pedido = session.query(Pedido).filter(Pedido.id == id_pedido).first()
 
     if not pedido:
@@ -38,12 +42,14 @@ async def cancelar_pedido(id_pedido: int, session: Session = Depends(pegar_sessa
                     status_code=400,
                     detail="Pedido não econtrado."
                 )
+    if not usuario.admin and usuario.id != pedido.usuario:
+        raise HTTPException(status_code=401, detail="Ação não autorizada para esse usuário.")
     
     pedido.status = "CANCELADO"
 
     session.commit()
     return {
-        "mensagem": f"Pedido [{id_pedido}] concelado com sucesso!",
+        "mensagem": f"Pedido [{pedido.id}] concelado com sucesso!",
         "pedido"  : pedido
     }
 
