@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from schemas import PedidoSchema
 from sqlalchemy.orm import Session
 from dependencies import pegar_sessao, verificar_token
-from models import Pedido, Usuario, usuario
+from models import Pedido, Usuario
 
 order_router = APIRouter(
         prefix='/pedidos',
@@ -52,6 +52,25 @@ async def cancelar_pedido(
         "mensagem": f"Pedido [{pedido.id}] concelado com sucesso!",
         "pedido"  : pedido
     }
+
+
+# listar todos pedidos (apenas admin)
+@order_router.get("/listar")
+async def listar_pedidos(session: Session = Depends(pegar_sessao), usuario: Usuario = Depends(verificar_token)):
+    if not usuario.admin:
+        raise HTTPException(status_code=401, detail="Ação não autorizada para esse usuário.")
+    else:
+        pedidos = session.query(Pedido).all()
+        return {
+            "pedidos": pedidos
+        }
+
+# adiconar pedido
+@order_router.post("/pedido/adicionar-item/{id_pedido}")
+async def adicionar_pedido():
+    pass
+
+
 
 
 
