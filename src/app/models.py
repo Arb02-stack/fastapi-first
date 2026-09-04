@@ -1,5 +1,5 @@
 from sqlalchemy import Column, String, Integer, Float, ForeignKey
-from sqlalchemy.orm import declarative_base, Mapped, mapped_column
+from sqlalchemy.orm import declarative_base, Mapped, mapped_column, relationship
 from pathlib import Path
 from sqlalchemy import create_engine
 
@@ -50,12 +50,18 @@ class Pedido(Base):
     status  = Column("status", String) # pendente/cancelado/finalizado
     usuario = Column("usuario", ForeignKey("usuarios.id")) # chave estrangeira com acesso a classe usuarios
     preco   = Column("preco", Float)
-    # itens =
+    itens   = relationship("ItemPedido", cascade="all, delete")
 
     def __init__(self, usuario, status="PENDENTE", preco=0):
         self.status  = status
         self.usuario = usuario
         self.preco   = preco
+
+    def calcular_preco(self):
+        """ Percorrer todos os itens do pedido, somar todos
+        os preços de todos os itens dos pedidos, editar no campo
+        'preco' o valor final do preço do pedido. """
+        self.preco = sum(item.preco_unitario * item.quantidade for item in self.itens)
 
 
 class ItemPedido(Base):
@@ -68,7 +74,7 @@ class ItemPedido(Base):
     preco_unitario = Column("preco_unitario", Float)
     pedido         = Column("pedido", ForeignKey("pedidos.id")) # precisa existir um pedido feito
 
-    def __init__(self, pedido, sabor, tamanho, quantidade=0, preco_unitario=0) -> None:
+    def __init__(self, pedido, sabor, tamanho, quantidade=0, preco_unitario=0.0) -> None:
         self.pedido         = pedido
         self.sabor          = sabor
         self.tamanho        = tamanho
