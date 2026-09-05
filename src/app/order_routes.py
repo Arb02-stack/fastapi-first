@@ -161,7 +161,12 @@ async def vizualizar_pedido(id_pedido: int,
     }
 
 # vizualizar todos os pedidos do usuário
-
+@order_router.get("/listar/pedidos-usuario")
+async def listar_todos_pedidos(session: Session = Depends(pegar_sessao), usuario: Usuario = Depends(verificar_token)):
+        pedidos = session.query(Pedido).filter(Pedido.usuario == usuario.id).all()
+        return {
+            "pedidos": pedidos
+        }
 
 
 
