@@ -84,10 +84,9 @@ async def adicionar_item_pedido(id_pedido: int,
                               item_pedido_schema.tamanho,
                               item_pedido_schema.quantidade,
                               item_pedido_schema.preco_unitario
-                             )
-
-    pedido.calcular_preco()
+                            )
     session.add(item_pedido)
+    pedido.calcular_preco()
     session.commit()
     return {
         "mensagem": "Item criado com sucesso!",
@@ -96,10 +95,26 @@ async def adicionar_item_pedido(id_pedido: int,
     }
 
 
+# remover item pedido
+@order_router.post("/pedido/remover-item/{id_item_pedido}")
+async def remover_item_pedido( id_item_pedido: int,
+                                session: Session = Depends(pegar_sessao),
+                                usuario: Usuario = Depends(verificar_token)
+                               ):
+   item_pedido = session.query(ItemPedido).filter(ItemPedido.id == id_item_pedido).first()
+   pedido = session.query(Pedido).filter(Pedido.id == item_pedido.pedido).first() # pyright: ignore[reportOptionalMemberAccess]
+   if not item_pedido:
+        raise HTTPException(status_code=400, detail="Item no pedido não encontrado.")
 
+   if not usuario.admin and usuario.id != pedido.usuario: # pyright: ignore[reportOptionalMemberAccess]
+       raise HTTPException(status_code=401, detail="Ação não autorizada para esse usuário.")
 
-
-
-
-
+   session.delete(item_pedido)
+   pedido.calcular_preco() # pyright: ignore[reportOptionalMemberAccess]
+   session.commit()
+   return {
+       "mensagem": "Item removido com sucesso!",
+       "quantidade_itens_pedido": len(pedido.itens), # pyright: ignore[reportOptionalMemberAccess]
+       "pedido:": pedido
+   }
 
