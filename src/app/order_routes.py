@@ -118,3 +118,56 @@ async def remover_item_pedido( id_item_pedido: int,
        "pedido:": pedido
    }
 
+
+# finalizar um pedido
+@order_router.post("/pedido/finalizar/{id_pedido}")
+async def finalizar_pedido(
+        id_pedido: int,
+        session: Session = Depends(pegar_sessao),
+        usuario: Usuario = Depends(verificar_token)
+    ):
+    pedido = session.query(Pedido).filter(Pedido.id == id_pedido).first()
+
+    if not pedido:
+        raise HTTPException(
+                    status_code=400,
+                    detail="Pedido não econtrado."
+                )
+    if not usuario.admin and usuario.id != pedido.usuario:
+        raise HTTPException(status_code=401, detail="Ação não autorizada para esse usuário.")  
+    pedido.status = "FINALIZADO"
+    session.commit()
+    return {
+        "mensagem": f"Pedido [{pedido.id}] finalizado com sucesso!",
+        "pedido"  : pedido
+    }
+
+# vizualizar um pedido
+@order_router.get("/pedido/{id_pedido}")
+async def vizualizar_pedido(id_pedido: int,
+                            session: Session = Depends(pegar_sessao),
+                            usuario: Usuario = Depends(verificar_token)
+                            ):
+    
+    pedido = session.query(Pedido).filter(Pedido.id == id_pedido).first()
+
+    if not pedido:
+         raise HTTPException(status_code=400, detail="Item no pedido não encontrado.")
+    if not usuario.admin and usuario.id != pedido.usuario: # pyright: ignore[reportOptionalMemberAccess]
+        raise HTTPException(status_code=401, detail="Ação não autorizada para esse usuário.")
+    return {
+        "quantidade_itens_pedido": len(pedido.itens),
+        "pedido": pedido
+    }
+
+# vizualizar todos os pedidos do usuário
+
+
+
+
+
+
+
+
+
+
