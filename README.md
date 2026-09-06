@@ -33,3 +33,7 @@
     - poetry run alembic revision --autogenerate -m "Add telefone to usuarios"
 - Depois aplicar:
     - poetry run alembic upgrade head
+
+# Instalar as dependências do projeto (poetry)
+- Dentro da pasta do projeto (onde fica o arquivo pyproject.toml):
+    - poetry install
