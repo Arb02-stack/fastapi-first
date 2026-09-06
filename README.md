@@ -1,4 +1,6 @@
-# FastAPI | Poetry
+# FastAPI | Poetry | (pizzaria)
+
+## Apenas o Backend
 
 - Criar projeto:
     - poetry new nome_do_prjeto
